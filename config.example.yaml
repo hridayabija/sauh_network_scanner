@@ -1,18 +1,42 @@
-api_url: https://api.kauliki.ru
-# Your own key only; configure reads it without echoing and writes a private file.
+# Общедоступный пример. Настоящий API_KEY выдаёт администратор отдельно каждой машине.
+# HTTPS-origin центрального API; сканер не получает адреса PostgreSQL или SSH.
+api_url: https://sauh.duckdns.org
+# Локальный закрытый файл с единственным ключом этого сканера.
 API_KEY_FILE: credentials.json
+# Каталог локальных заданий, результатов и логов; сохраняется между запусками.
 state_directory: state
+# Параллельные полные VPN-проверки на этой машине.
 vpn_full_workers: 2
+# Отдельные воркеры быстрой VPN-доступности; не заняты полными проверками.
 vpn_health_workers: 2
+# Параллельные полные проверки MTProxy на этой машине.
 mtproxy_full_workers: 1
+# Отдельные воркеры быстрой доступности MTProxy.
 mtproxy_health_workers: 1
+# Путь к проверяющему ядру sing-box.
 core_path: state/bin/sing-box
+# Период сообщения API о доступности этой машины, секунды.
 heartbeat_seconds: 30
+# Пауза запроса новых заданий при пустой очереди, секунды.
 poll_seconds: 5
+# Пауза между пакетными отправками готовых результатов, секунды.
 publish_seconds: 2
+# Максимум результатов в одном пакете API.
 publish_batch_size: 100
+# Предел очереди неподтверждённых сервером результатов; после него проверки ждут.
 max_pending_results: 2000
+# Максимальный размер локального хранилища, МиБ.
 max_storage_mb: 256
+# Приостанавливать выдачу новых заданий при работе ноутбука от батареи.
 pause_on_battery: false
-active_hours: null  # Example: ['08:00', '23:00']; local clock, overnight supported.
-active_days: [0, 1, 2, 3, 4, 5, 6]
+# Разрешённый интервал локального времени, например [09:00, 22:00]; null — весь день.
+active_hours: null
+# Дни работы: 0 — понедельник, 6 — воскресенье.
+active_days:
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6

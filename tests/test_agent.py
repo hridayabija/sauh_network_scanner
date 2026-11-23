@@ -12,11 +12,11 @@ from uuid import uuid4
 from aiohttp import web
 from aiohttp.test_utils import TestServer
 
-from kauliki_network_scanner.api import APIClient, APIError
-from kauliki_network_scanner.autostart import definition
-from kauliki_network_scanner.config import Settings
-from kauliki_network_scanner.runtime import Runtime
-from kauliki_network_scanner.storage import DeviceLock, Outbox
+from sauh_network_scanner.api import APIClient, APIError
+from sauh_network_scanner.autostart import definition
+from sauh_network_scanner.config import Settings
+from sauh_network_scanner.runtime import Runtime
+from sauh_network_scanner.storage import DeviceLock, Outbox
 
 
 KEY = "synthetic-only-key-" + "A" * 40
@@ -61,7 +61,7 @@ class ConfigurationTests(unittest.TestCase):
             text = definition(
                 system, config, executable="C:/Program Files/Python/python.exe"
             )
-            self.assertIn("kauliki_network_scanner", text)
+            self.assertIn("sauh_network_scanner", text)
             self.assertNotIn(KEY, text)
             if system == "windows":
                 import xml.etree.ElementTree as ET
@@ -177,7 +177,7 @@ class APITests(unittest.IsolatedAsyncioTestCase):
         await self.api.post("heartbeat", {})
         before = self.api.server_now()
         with patch(
-            "kauliki_network_scanner.api.time.time", return_value=time.time() + 86400
+            "sauh_network_scanner.api.time.time", return_value=time.time() + 86400
         ):
             self.assertLess(abs(self.api.server_now() - before), 1)
 

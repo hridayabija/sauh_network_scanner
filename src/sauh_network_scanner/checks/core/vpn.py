@@ -9,8 +9,8 @@ from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from kauliki_network_scanner.checks.core.geoip import DEFAULT_GEOIP_PATH, GeoIPMode
-from kauliki_network_scanner.checks.core.proxy import ProxyURL
+from sauh_network_scanner.checks.core.geoip import DEFAULT_GEOIP_PATH, GeoIPMode
+from sauh_network_scanner.checks.core.proxy import ProxyURL
 
 
 def web_url(value: str, *, https_only=True):
@@ -259,7 +259,7 @@ class VPNSettings(BaseModel):
 
     @property
     def health_probe_urls(self):
-        from kauliki_network_scanner.checks.domain.vpn import probe_provider
+        from sauh_network_scanner.checks.domain.vpn import probe_provider
 
         result, providers = [], set()
         for url in self.probe_urls:

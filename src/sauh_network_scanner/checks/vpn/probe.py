@@ -10,14 +10,14 @@ from datetime import datetime, timezone
 
 import aiohttp
 
-from kauliki_network_scanner.checks.domain.vpn import (
+from sauh_network_scanner.checks.domain.vpn import (
     CHECKER_VERSION,
     LatencyProbe,
     VPNObservation,
 )
-from kauliki_network_scanner.checks.vpn.core import CoreError
-from kauliki_network_scanner.checks.vpn.network import resolve_public
-from kauliki_network_scanner.checks.vpn.tls_audit import TLSAuditError
+from sauh_network_scanner.checks.vpn.core import CoreError
+from sauh_network_scanner.checks.vpn.network import resolve_public
+from sauh_network_scanner.checks.vpn.tls_audit import TLSAuditError
 
 
 class ProbeError(ValueError):

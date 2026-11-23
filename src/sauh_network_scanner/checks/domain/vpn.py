@@ -16,7 +16,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
 
-from kauliki_network_scanner.checks.domain.mtproxy import (
+from sauh_network_scanner.checks.domain.mtproxy import (
     HISTORY_WINDOW,
     country_flag,
     normalize_host,

@@ -10,7 +10,7 @@ from xml.sax.saxutils import escape
 def definition(system, config, executable=None):
     config = str(Path(config).resolve())
     executable = executable or sys.executable
-    args = ["-m", "kauliki_network_scanner", "--config", config, "run"]
+    args = ["-m", "sauh_network_scanner", "--config", config, "run"]
     if system == "windows":
         arguments = subprocess.list2cmdline(args)
         return f"""<?xml version="1.0" encoding="UTF-16"?>
@@ -23,7 +23,7 @@ def definition(system, config, executable=None):
     if system == "darwin":
         return plistlib.dumps(
             dict(
-                Label="ru.kauliki.network-scanner",
+                Label="ru.sauh.network-scanner",
                 ProgramArguments=[executable, *args],
                 RunAtLoad=True,
                 KeepAlive=True,
@@ -41,7 +41,7 @@ def definition(system, config, executable=None):
     return "\n".join(
         [
             "[Unit]",
-            "Description=Kauliki Network Scanner",
+            "Description=SAUH Network Scanner",
             "After=network-online.target",
             "",
             "[Service]",

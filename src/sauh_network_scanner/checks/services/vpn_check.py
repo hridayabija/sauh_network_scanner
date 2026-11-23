@@ -6,13 +6,13 @@ from dataclasses import dataclass
 import logging
 import time
 
-from kauliki_network_scanner.checks.domain.vpn import CHECKER_VERSION, VPNObservation
-from kauliki_network_scanner.checks.vpn.core import (
+from sauh_network_scanner.checks.domain.vpn import CHECKER_VERSION, VPNObservation
+from sauh_network_scanner.checks.vpn.core import (
     CoreConfigError,
     CoreError,
     CoreRunner,
 )
-from kauliki_network_scanner.checks.vpn.probe import check_vpn
+from sauh_network_scanner.checks.vpn.probe import check_vpn
 
 
 logger = logging.getLogger(__name__)

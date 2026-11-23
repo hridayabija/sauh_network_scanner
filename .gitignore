@@ -12,4 +12,4 @@ logs/
 *.sqlite3*
 *.lock
 sing-box*
-!src/kauliki_network_scanner/core-releases.json
+!src/sauh_network_scanner/core-releases.json

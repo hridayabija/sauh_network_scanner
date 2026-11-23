@@ -6,12 +6,12 @@ from functools import partial
 import logging
 import time
 
-from kauliki_network_scanner.checks.domain.mtproxy import (
+from sauh_network_scanner.checks.domain.mtproxy import (
     CHECKER_VERSION,
     DCObservation,
     ProxyObservation,
 )
-from kauliki_network_scanner.checks.mtproxy.protocol import (
+from sauh_network_scanner.checks.mtproxy.protocol import (
     MTProxyCheckerError,
     check_proxy,
 )

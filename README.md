@@ -1,4 +1,4 @@
-# kauliki_network_scanner
+# sauh_network_scanner
 
 Автономный агент проверки VPN и MTProxy для Windows, Linux и macOS. Можно запускать
 на VPS, рабочем ПК или ноутбуке, работающем лишь часть дня. Python **3.11+**.
@@ -17,9 +17,9 @@ Linux/macOS:
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-.venv/bin/python -m kauliki_network_scanner configure
-.venv/bin/python -m kauliki_network_scanner install-core
-.venv/bin/python -m kauliki_network_scanner run
+.venv/bin/python -m sauh_network_scanner configure
+.venv/bin/python -m sauh_network_scanner install-core
+.venv/bin/python -m sauh_network_scanner run
 ```
 
 Windows, PowerShell:
@@ -27,17 +27,17 @@ Windows, PowerShell:
 ```powershell
 py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\python.exe -m kauliki_network_scanner configure
-.\.venv\Scripts\python.exe -m kauliki_network_scanner install-core
-.\.venv\Scripts\python.exe -m kauliki_network_scanner run
+.\.venv\Scripts\python.exe -m sauh_network_scanner configure
+.\.venv\Scripts\python.exe -m sauh_network_scanner install-core
+.\.venv\Scripts\python.exe -m sauh_network_scanner run
 ```
 
 Можно использовать установленный Python 3.11/3.12/3.13 вместо 3.14. `configure`
 запрашивает индивидуальный ключ без отображения и создаёт `scanner.yaml` и приватный
-`credentials.json`. По умолчанию API — `https://api.kauliki.ru`; другой origin:
+`credentials.json`. По умолчанию API — `https://sauh.duckdns.org`; другой origin:
 
 ```bash
-python -m kauliki_network_scanner configure --api-url https://api.example.org
+python -m sauh_network_scanner configure --api-url https://api.example.org
 ```
 
 Права администратора для самого сканирования и TUN не нужны. Агент не подключает
@@ -68,9 +68,9 @@ YAML либо `API_KEY_ENV`, но удобнее оставить отдельн
 ограничивает количество одновременных заданий для каждого ключа.
 
 ```bash
-python -m kauliki_network_scanner validate-config
-python -m kauliki_network_scanner status
-python -m kauliki_network_scanner run --duration 120
+python -m sauh_network_scanner validate-config
+python -m sauh_network_scanner status
+python -m sauh_network_scanner run --duration 120
 ```
 
 Отключение по Ctrl+C сохраняет законченные измерения. Задания и outbox находятся в
@@ -93,11 +93,11 @@ HTTPS API проверяет сертификат и не следует пер�
 Linux, пользовательский systemd:
 
 ```bash
-.venv/bin/python -m kauliki_network_scanner autostart --output kauliki-network-scanner.service
+.venv/bin/python -m sauh_network_scanner autostart --output sauh-network-scanner.service
 mkdir -p ~/.config/systemd/user
-cp kauliki-network-scanner.service ~/.config/systemd/user/
+cp sauh-network-scanner.service ~/.config/systemd/user/
 systemctl --user daemon-reload
-systemctl --user enable --now kauliki-network-scanner.service
+systemctl --user enable --now sauh-network-scanner.service
 ```
 
 Без lingering пользовательская служба запускается при входе пользователя.
@@ -107,9 +107,9 @@ systemctl --user enable --now kauliki-network-scanner.service
 Windows, запуск при входе текущего пользователя:
 
 ```powershell
-.\.venv\Scripts\python.exe -m kauliki_network_scanner autostart --output kauliki-network-scanner.xml
-Register-ScheduledTask -TaskName KaulikiNetworkScanner -Xml (Get-Content -Raw .\kauliki-network-scanner.xml) -User "$env:USERDOMAIN\$env:USERNAME" -Force
-Start-ScheduledTask -TaskName KaulikiNetworkScanner
+.\.venv\Scripts\python.exe -m sauh_network_scanner autostart --output sauh-network-scanner.xml
+Register-ScheduledTask -TaskName SAUHNetworkScanner -Xml (Get-Content -Raw .\sauh-network-scanner.xml) -User "$env:USERDOMAIN\$env:USERNAME" -Force
+Start-ScheduledTask -TaskName SAUHNetworkScanner
 ```
 
 Задача работает без повышения прав и перезапускается при отказе. Один каталог
@@ -119,10 +119,10 @@ Start-ScheduledTask -TaskName KaulikiNetworkScanner
 macOS, пользовательский launchd:
 
 ```bash
-.venv/bin/python -m kauliki_network_scanner autostart --output ru.kauliki.network-scanner.plist
+.venv/bin/python -m sauh_network_scanner autostart --output ru.sauh.network-scanner.plist
 mkdir -p ~/Library/LaunchAgents
-cp ru.kauliki.network-scanner.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/ru.kauliki.network-scanner.plist
+cp ru.sauh.network-scanner.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/ru.sauh.network-scanner.plist
 ```
 
 ## Проверки и обновление
@@ -144,3 +144,10 @@ GitHub Actions проверяет Python 3.11 и 3.14 на Windows, Linux и mac
 Не публикуйте локальные `scanner.yaml`, `credentials.json`, `state/` и журналы;
 они исключены через `.gitignore`. Код лицензирован MIT; отдельно установленный
 sing-box распространяется его разработчиками под своей лицензией GPLv3.
+
+## Supervisor на Linux
+
+Собственный шаблон: `deploy/supervisor/sauh-network-scanner.conf`. Замените
+пользователя и пути, создайте `logs`, настройте `scanner.yaml` и индивидуальный
+ключ, установите sing-box, затем включите процесс. Для Windows и macOS остаются
+штатные команды `autostart`; Supervisor на Windows не требуется.

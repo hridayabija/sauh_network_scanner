@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 import json
 from types import SimpleNamespace
 
-from kauliki_network_scanner.checks.core.vpn import VPNSettings
-from kauliki_network_scanner.checks.domain.vpn import (
+from sauh_network_scanner.checks.core.vpn import VPNSettings
+from sauh_network_scanner.checks.domain.vpn import (
     CHECKER_VERSION,
     LatencyProbe,
     VPNSpec,

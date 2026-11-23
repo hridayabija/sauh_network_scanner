@@ -13,7 +13,7 @@ import shutil
 import socket
 import tempfile
 
-from kauliki_network_scanner.checks.vpn.tls_audit import TLSAuditRelay
+from sauh_network_scanner.checks.vpn.tls_audit import TLSAuditRelay
 
 
 class CoreError(RuntimeError):

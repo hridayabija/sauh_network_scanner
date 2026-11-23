@@ -13,7 +13,7 @@ import yaml
 
 class Settings(BaseModel):
     model_config = {"extra": "forbid", "hide_input_in_errors": True}
-    api_url: str = "https://api.kauliki.ru"
+    api_url: str = "https://sauh.duckdns.org"
     API_KEY: SecretStr | None = None
     API_KEY_ENV: str | None = Field(default=None, pattern=r"^[A-Z][A-Z0-9_]*$")
     API_KEY_FILE: str = "credentials.json"

@@ -22,15 +22,15 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, x25519
 from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
 
-from kauliki_network_scanner.checks.core.vpn import VPNSettings
-from kauliki_network_scanner.checks.domain.vpn import PROTOCOL_LABELS, VPNSpec
-from kauliki_network_scanner.checks.vpn.core import (
+from sauh_network_scanner.checks.core.vpn import VPNSettings
+from sauh_network_scanner.checks.domain.vpn import PROTOCOL_LABELS, VPNSpec
+from sauh_network_scanner.checks.vpn.core import (
     CoreError,
     CoreRunner,
     checker_config,
     terminate,
 )
-from kauliki_network_scanner.checks.vpn.probe import check_vpn
+from sauh_network_scanner.checks.vpn.probe import check_vpn
 from vpn_support import UUID, spec
 
 
@@ -457,7 +457,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
                 except ConnectionRefusedError:
                     await asyncio.sleep(0.05)
         self.resolver = patch(
-            "kauliki_network_scanner.checks.vpn.probe.resolve_public",
+            "sauh_network_scanner.checks.vpn.probe.resolve_public",
             new=AsyncMock(return_value=[(socket.AF_INET, "8.8.8.8")]),
         )
 
@@ -469,7 +469,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
                 await writer.wait_closed()
 
         self.preflight = patch(
-            "kauliki_network_scanner.checks.vpn.probe.tcp_preflight",
+            "sauh_network_scanner.checks.vpn.probe.tcp_preflight",
             new=local_preflight,
         )
         self.preflight.start()
@@ -495,7 +495,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             return result
 
         self.local_route = patch(
-            "kauliki_network_scanner.checks.vpn.core.checker_config",
+            "sauh_network_scanner.checks.vpn.core.checker_config",
             side_effect=local_config,
         )
 
@@ -503,7 +503,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             return await asyncio.open_connection("127.0.0.1", relay.port)
 
         self.audit_route = patch(
-            "kauliki_network_scanner.checks.vpn.tls_audit.TLSAuditRelay.open_upstream",
+            "sauh_network_scanner.checks.vpn.tls_audit.TLSAuditRelay.open_upstream",
             new=local_upstream,
         )
         self.resolver.start()
@@ -708,7 +708,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
     ):
         self.resolver.stop()
         with patch(
-            "kauliki_network_scanner.checks.vpn.probe.resolve_public",
+            "sauh_network_scanner.checks.vpn.probe.resolve_public",
             new=AsyncMock(
                 return_value=[(socket.AF_INET, "8.8.8.8"), (socket.AF_INET, "9.9.9.9")]
             ),
@@ -900,7 +900,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_local_core_failure_propagates_instead_of_recording_dead_nodes(self):
         with patch(
-            "kauliki_network_scanner.checks.vpn.core.checker_config",
+            "sauh_network_scanner.checks.vpn.core.checker_config",
             return_value={"outbounds": [{"type": "unknown-core-type"}]},
         ):
             with self.assertRaises(CoreError):

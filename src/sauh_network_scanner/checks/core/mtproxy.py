@@ -5,9 +5,9 @@ import json
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from kauliki_network_scanner.checks.core.geoip import DEFAULT_GEOIP_PATH, GeoIPMode
-from kauliki_network_scanner.checks.core.vpn import SourcesProxy, VPNSourceSettings
-from kauliki_network_scanner.checks.domain.mtproxy import PROXY_TYPE_KINDS, ProxyType
+from sauh_network_scanner.checks.core.geoip import DEFAULT_GEOIP_PATH, GeoIPMode
+from sauh_network_scanner.checks.core.vpn import SourcesProxy, VPNSourceSettings
+from sauh_network_scanner.checks.domain.mtproxy import PROXY_TYPE_KINDS, ProxyType
 
 
 class MTProxySettings(BaseModel):

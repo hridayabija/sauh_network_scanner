@@ -10,7 +10,7 @@ from contextlib import suppress
 import ipaddress
 import secrets
 
-from kauliki_network_scanner.checks.domain.vpn import TLSNegotiation
+from sauh_network_scanner.checks.domain.vpn import TLSNegotiation
 
 
 TLS12_CIPHERS = {

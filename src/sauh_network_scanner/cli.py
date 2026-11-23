@@ -76,7 +76,7 @@ def main():
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     setup = commands.add_parser("configure")
-    setup.add_argument("--api-url", default="https://api.kauliki.ru")
+    setup.add_argument("--api-url", default="https://sauh.duckdns.org")
     commands.add_parser("validate-config")
     commands.add_parser("status")
     installation = commands.add_parser("install-core")
@@ -98,7 +98,7 @@ def main():
     )
     # Third-party probe exception strings can contain target credentials; only
     # controlled runtime summaries are sent to stdout or central logs.
-    for name in ("kauliki_network_scanner.checks", "aiohttp", "asyncio"):
+    for name in ("sauh_network_scanner.checks", "aiohttp", "asyncio"):
         logging.getLogger(name).setLevel(logging.CRITICAL)
     try:
         if args.command == "configure":

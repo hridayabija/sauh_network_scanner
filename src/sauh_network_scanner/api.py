@@ -30,7 +30,7 @@ class APIClient:
             timeout=aiohttp.ClientTimeout(total=self.settings.request_timeout_seconds),
             headers={
                 "Accept-Encoding": "identity",
-                "User-Agent": "kauliki_network_scanner/1.0.0",
+                "User-Agent": "sauh_network_scanner/1.0.0",
             },
         )
         return self

@@ -17,10 +17,10 @@ from unittest.mock import patch
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from kauliki_network_scanner.checks.core.mtproxy import MTProxySettings
-from kauliki_network_scanner.checks.domain.mtproxy import ProxySecret, ProxySpec
-from kauliki_network_scanner.checks.services.mtproxy_check import check_many
-from kauliki_network_scanner.checks.mtproxy.protocol import (
+from sauh_network_scanner.checks.core.mtproxy import MTProxySettings
+from sauh_network_scanner.checks.domain.mtproxy import ProxySecret, ProxySpec
+from sauh_network_scanner.checks.services.mtproxy_check import check_many
+from sauh_network_scanner.checks.mtproxy.protocol import (
     ProtocolError,
     check_proxy,
     client_hello,
@@ -126,7 +126,7 @@ class ProtocolPeerTests(unittest.IsolatedAsyncioTestCase):
         self.server = await asyncio.start_server(self.handle, "127.0.0.1", 0)
         self.port = self.server.sockets[0].getsockname()[1]
         self.resolver = patch(
-            "kauliki_network_scanner.checks.mtproxy.protocol.resolve_public",
+            "sauh_network_scanner.checks.mtproxy.protocol.resolve_public",
             return_value=[(socket.AF_INET, "127.0.0.1")],
         )
         self.resolver.start()
@@ -344,7 +344,7 @@ class ProtocolPeerTests(unittest.IsolatedAsyncioTestCase):
             probe_timeout_seconds=0.2,
         )
         with patch(
-            "kauliki_network_scanner.checks.mtproxy.protocol.resolve_public",
+            "sauh_network_scanner.checks.mtproxy.protocol.resolve_public",
             return_value=[(socket.AF_INET, "127.0.0.2"), (socket.AF_INET, "127.0.0.1")],
         ):
             result = await check_proxy(spec, config, preferred_ip="127.0.0.1")
@@ -394,7 +394,7 @@ class ProtocolPeerTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_dns_failure_is_saved_for_every_dc_without_a_socket(self):
         with patch(
-            "kauliki_network_scanner.checks.mtproxy.protocol.resolve_public",
+            "sauh_network_scanner.checks.mtproxy.protocol.resolve_public",
             side_effect=OSError("NXDOMAIN"),
         ):
             result = await self.probe(dcs=[1, 2, 3, 4, 5])

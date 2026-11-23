@@ -18,8 +18,8 @@ import time
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from kauliki_network_scanner.checks.core.mtproxy import MTProxySettings
-from kauliki_network_scanner.checks.domain.mtproxy import (
+from sauh_network_scanner.checks.core.mtproxy import MTProxySettings
+from sauh_network_scanner.checks.domain.mtproxy import (
     CHECKER_VERSION,
     DCObservation,
     ProxyObservation,

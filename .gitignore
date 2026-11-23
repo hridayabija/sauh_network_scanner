@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env*
+scanner.yaml
+credentials.json
+state/
+logs/
+*.sqlite3*
+*.lock
+sing-box*
+!src/kauliki_network_scanner/core-releases.json

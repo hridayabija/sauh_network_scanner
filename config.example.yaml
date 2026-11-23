@@ -1,0 +1,18 @@
+api_url: https://api.kauliki.ru
+# Your own key only; configure reads it without echoing and writes a private file.
+API_KEY_FILE: credentials.json
+state_directory: state
+vpn_full_workers: 2
+vpn_health_workers: 2
+mtproxy_full_workers: 1
+mtproxy_health_workers: 1
+core_path: state/bin/sing-box
+heartbeat_seconds: 30
+poll_seconds: 5
+publish_seconds: 2
+publish_batch_size: 100
+max_pending_results: 2000
+max_storage_mb: 256
+pause_on_battery: false
+active_hours: null  # Example: ['08:00', '23:00']; local clock, overnight supported.
+active_days: [0, 1, 2, 3, 4, 5, 6]

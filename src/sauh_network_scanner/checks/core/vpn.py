@@ -196,7 +196,7 @@ class VPNSettings(BaseModel):
     probe_url: (
         SourceURL | Annotated[list[SourceURL], Field(min_length=1, max_length=10)]
     ) = Field(default_factory=lambda: list(DEFAULT_PROBE_URLS))
-    trace_url: str = "https://www.cloudflare.com/cdn-cgi/trace"
+    trace_url: str = "https://cloudflare.com/cdn-cgi/trace"
     download_url: str = "http://cachefly.cachefly.net/1mb.test"
     download_bytes: int = Field(default=1048576, ge=65536, le=4194304, strict=True)
     upload_url: str = "https://speed.cloudflare.com/__up"

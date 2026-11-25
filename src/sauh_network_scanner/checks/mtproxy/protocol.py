@@ -435,7 +435,6 @@ async def _check_proxy(
                         await writer.wait_closed()
                 except (TimeoutError, OSError):
                     pass
-    if geoip and result.ip:
-        result.country_code = geoip.country(result.ip)
+    result.country_code = None
     result.duration_ms = (time.monotonic() - start) * 1000
     return result

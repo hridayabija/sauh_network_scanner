@@ -170,20 +170,13 @@ async def probe_tunnel(
                 != "identity"
             ):
                 raise ProbeError("compressed trace response")
-            exit_ip, country = parse_trace(await bounded_body(response, 4096))
+            exit_ip, _ = parse_trace(await bounded_body(response, 4096))
     except (aiohttp.ClientError, TimeoutError, ProbeError) as error:
         failed("trace", error)
     else:
         observation.exit_ip = exit_ip
-        local_country = geoip.country(exit_ip) if geoip is not None else None
-        observation.country_code = local_country or country
-        observation.geo_source = (
-            getattr(geoip, "source", "mmdb")
-            if local_country
-            else "trace"
-            if country
-            else None
-        )
+        observation.country_code = None
+        observation.geo_source = None
 
     if on_phase:
         on_phase("download")
@@ -311,9 +304,7 @@ async def check_vpn(
             # Trying a second DNS address must not double-count this check as a success.
             for _, address in addresses[:3]:
                 observation.resolved_ip = address
-                observation.endpoint_country_code = (
-                    geoip.country(address) if geoip else None
-                )
+                observation.endpoint_country_code = None
                 phase = "tunnel"
                 try:
                     if spec.protocol not in {"hysteria2", "tuic"}:

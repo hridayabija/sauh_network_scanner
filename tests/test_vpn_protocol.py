@@ -524,7 +524,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
                 result = await check_vpn(value, self.config, self.core)
                 self.assertTrue(result.working, result.error)
                 self.assertEqual(
-                    (result.exit_ip, result.country_code), ("1.1.1.1", "US")
+                    (result.exit_ip, result.country_code), ("1.1.1.1", None)
                 )
                 self.assertEqual(result.download_bytes, 65536)
                 self.assertGreater(result.download_mbps, 0)
@@ -788,7 +788,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
     ):
         result = await check_vpn(self.specs["vless"], self.config, self.core)
         self.assertTrue(result.working, result.error)
-        self.assertEqual((result.exit_ip, result.country_code), ("1.1.1.1", "US"))
+        self.assertEqual((result.exit_ip, result.country_code), ("1.1.1.1", None))
         self.assertEqual(result.download_bytes, self.config.download_bytes)
         self.assertEqual(
             self.target_requests, ["/204", "/204", "/trace", "/download", "/upload"]

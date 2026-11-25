@@ -2,8 +2,26 @@
 
 import json
 import time
+import math
 
 import aiohttp
+
+
+ERROR_CODES = frozenset(
+    """
+unauthorized scanner_disabled rate_limited busy temporarily_unavailable request_timeout
+invalid_request json_required body_too_large invalid_content_length not_found invalid_peer
+kind_forbidden heartbeat_required request_id_conflict observation_too_large
+invalid_observation_shape observation_identity_required invalid_observation policy_mismatch
+samples_mismatch attempt_limit measurement_outside_lease expired_result endpoint_mismatch
+incomplete_transfer_proof health_providers_mismatch dc_mismatch assignment_not_owned
+observation_id_conflict assignment_completed attempt_conflict
+""".split()
+)
+
+
+def safe_code(value, default="api_rejected"):
+    return value if isinstance(value, str) and value in ERROR_CODES else default
 
 
 class APIError(RuntimeError):
@@ -57,17 +75,32 @@ class APIClient:
                         raise APIError(response.status, "response_too_large")
                 if response.status != 200:
                     try:
-                        delay = min(
-                            60, max(1, float(response.headers.get("Retry-After", 5)))
-                        )
+                        delay = min(60, max(1, float(response.headers.get("Retry-After", 5))))
                     except ValueError:
                         delay = 5
-                    # Never use server bodies/exception URLs as log messages.
+                    if not math.isfinite(delay):
+                        delay = 5
+                    fallback = {
+                        401: "unauthorized",
+                        403: "unauthorized",
+                        429: "rate_limited",
+                        502: "bad_gateway",
+                        503: "temporarily_unavailable",
+                        504: "gateway_timeout",
+                    }.get(response.status, "api_rejected")
+                    try:
+                        payload = json.loads(raw)
+                        code = (
+                            safe_code(payload.get("error"), fallback)
+                            if isinstance(payload, dict)
+                            else fallback
+                        )
+                    except ValueError:
+                        code = fallback
+                    # Only known protocol codes are logged; never arbitrary bodies.
                     raise APIError(
                         response.status,
-                        "unauthorized"
-                        if response.status in (401, 403)
-                        else "api_rejected",
+                        code,
                         delay,
                     )
                 result = json.loads(raw)
@@ -78,12 +111,14 @@ class APIClient:
 
                     server = datetime.fromisoformat(result["server_time"]).timestamp()
                     self.clock_offset = server - (started + time.time()) / 2
-                    self.server_epoch = (
-                        server + (time.monotonic() - started_monotonic) / 2
-                    )
+                    self.server_epoch = server + (time.monotonic() - started_monotonic) / 2
                     self.server_monotonic = time.monotonic()
                 return result
         except APIError:
             raise
-        except (aiohttp.ClientError, TimeoutError, ValueError, OSError):
+        except TimeoutError:
+            raise APIError(code="connection_timeout") from None
+        except (aiohttp.ClientError, OSError):
             raise APIError() from None
+        except ValueError:
+            raise APIError(200, "invalid_response") from None

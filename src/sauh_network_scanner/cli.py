@@ -19,6 +19,7 @@ from . import __version__
 from .autostart import definition
 from .config import Settings, load_settings
 from .install import install_core
+from .logging import configure_logging
 from .runtime import Runtime
 from .storage import DeviceLock, Outbox, private_path
 
@@ -135,6 +136,7 @@ def main():
             settings.credential()
             if args.duration is not None and args.duration <= 0:
                 raise ValueError("duration must be positive")
+            configure_logging(settings)
             asyncio.run(run(settings, args.duration))
     except KeyboardInterrupt:
         return 0

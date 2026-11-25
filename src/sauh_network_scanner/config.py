@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+from typing import Literal
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, SecretStr, model_validator
@@ -32,6 +33,10 @@ class Settings(BaseModel):
     max_storage_mb: int = Field(default=256, ge=16, le=4096)
     request_timeout_seconds: float = Field(default=20, ge=1, le=120)
     retry_max_seconds: float = Field(default=60, ge=1, le=300)
+    progress_seconds: float = Field(default=60, ge=10, le=3600)
+    log_level: Literal["INFO", "DEBUG"] = "INFO"
+    log_max_bytes: int = Field(default=5 * 1024 * 1024, ge=65536, le=100 * 1024 * 1024)
+    log_backups: int = Field(default=3, ge=1, le=20)
     pause_on_battery: bool = False
     active_hours: list[str] | None = Field(default=None, min_length=2, max_length=2)
     active_days: list[int] = Field(
@@ -46,9 +51,7 @@ class Settings(BaseModel):
         if parsed.scheme != "https" and not (
             parsed.scheme == "http" and loopback and self.allow_http_loopback
         ):
-            raise ValueError(
-                "api_url must use HTTPS; local HTTP tests require allow_http_loopback"
-            )
+            raise ValueError("api_url must use HTTPS; local HTTP tests require allow_http_loopback")
         if (
             not parsed.hostname
             or parsed.username
@@ -57,9 +60,7 @@ class Settings(BaseModel):
             or parsed.fragment
             or parsed.path.strip("/")
         ):
-            raise ValueError(
-                "api_url must contain only an origin, without credentials/path/query"
-            )
+            raise ValueError("api_url must contain only an origin, without credentials/path/query")
         if any(day not in range(7) for day in self.active_days) or len(
             set(self.active_days)
         ) != len(self.active_days):
@@ -92,9 +93,7 @@ class Settings(BaseModel):
             try:
                 key = json.loads(Path(self.API_KEY_FILE).read_text())["API_KEY"]
             except (OSError, ValueError, KeyError):
-                raise ValueError(
-                    "Configure your own API_KEY with the configure command"
-                ) from None
+                raise ValueError("Configure your own API_KEY with the configure command") from None
         if not isinstance(key, str) or not re.fullmatch(r"[A-Za-z0-9._-]{32,512}", key):
             raise ValueError("Your API_KEY must contain at least 32 characters")
         return key

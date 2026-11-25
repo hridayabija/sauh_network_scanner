@@ -151,3 +151,38 @@ sing-box распространяется его разработчиками п
 пользователя и пути, создайте `logs`, настройте `scanner.yaml` и индивидуальный
 ключ, установите sing-box, затем включите процесс. Для Windows и macOS остаются
 штатные команды `autostart`; Supervisor на Windows не требуется.
+## Логирование и отчёты
+
+Во время `python -m sauh_network_scanner run` раз в минуту выводится
+`agent.progress`: состояние, активные/полученные/завершённые задания, успешные
+проверки, попытки и локальные ошибки отдельно для VPN full/health и MTProxy
+full/health. Также показаны доставленные/отклонённые результаты, очередь outbox
+и её размер. События сохраняются в `state/scanner.log` рядом с локальной SQLite.
+
+Дополнительные параметры `scanner.yaml`:
+
+```yaml
+progress_seconds: 60
+log_level: INFO  # DEBUG добавляет ID заданий, попытки и длительность проверок
+log_max_bytes: 5242880
+log_backups: 3
+```
+
+Пример ошибки:
+
+```text
+WARNING api.unavailable: lane=results HTTP=503 code=temporarily_unavailable failures=1 retry_seconds=5.4 pending=27
+INFO api.recovered: lane=results failures=1 pending=0
+```
+
+HTTP-статус и известный код API помогают отличить временную ошибку сервера,
+недействующий ключ, лимит запросов и неверный формат. Результаты остаются в outbox
+при HTTP/сетевых ошибках. При окончательном отклонении сервером `results.rejected`
+показывает причины, например `expired_result` или `policy_mismatch`.
+Неизвестные тексты ответов и реквизиты VPN/MTProxy в логи не копируются.
+При остановке сохраняется `agent.stopped` с итоговыми счётчиками; клиент пытается
+доставить журнал и отправить heartbeat с паузой.
+
+Отчёты Telegram отправляет **главный сервер**, где администратор настраивает
+`network_api.telegram`. Они оформлены в MarkdownV2 и показывают все устройства,
+их очереди, проверки и актуальную выдачу. На этом ПК токен Telegram не нужен.

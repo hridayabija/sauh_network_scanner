@@ -23,6 +23,25 @@ KEY = "synthetic-only-key-" + "A" * 40
 
 
 class ConfigurationTests(unittest.TestCase):
+    def test_api_proxy_is_optional_validated_and_redacted(self):
+        self.assertIsNone(Settings().api_proxy)
+        for scheme in ("http", "https", "socks4", "socks5", "socks5h"):
+            with self.subTest(scheme=scheme):
+                proxy = f"{scheme}://user:private-proxy-password@127.0.0.1:1080"
+                settings = Settings(api_proxy=proxy)
+                self.assertEqual(settings.api_proxy.get_secret_value(), proxy)
+                self.assertNotIn("private-proxy-password", settings.model_dump_json())
+        for invalid in (
+            "ftp://proxy.example:1080",
+            "http://proxy.example",
+            "http://proxy.example:65536",
+            "http://proxy.example:8080/api",
+            "socks5://private-proxy-user@proxy.example:1080",
+        ):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError) as error:
+                Settings(api_proxy=invalid)
+            self.assertNotIn(invalid, str(error.exception))
+
     def test_plain_http_and_embedded_credentials_are_rejected(self):
         for origin in (
             "http://example.com",
@@ -165,6 +184,68 @@ class APITests(unittest.IsolatedAsyncioTestCase):
         self.api = APIClient(settings)
         await self.api.__aenter__()
         self.addAsyncCleanup(self.api.__aexit__, None, None, None)
+
+    async def test_https_requests_use_connect_and_keep_the_api_key_inside_tls(self):
+        attempts = []
+
+        async def reject_connect(reader, writer):
+            try:
+                attempts.append(await reader.readuntil(b"\r\n\r\n"))
+                writer.write(b"HTTP/1.1 407 Proxy Authentication Required\r\n\r\n")
+                await writer.drain()
+            finally:
+                writer.close()
+                await writer.wait_closed()
+
+        async with await asyncio.start_server(reject_connect, "127.0.0.1", 0) as proxy:
+            port = proxy.sockets[0].getsockname()[1]
+            settings = Settings(
+                api_url="https://127.0.0.1:1",
+                api_proxy=f"http://user:password@127.0.0.1:{port}",
+                API_KEY=KEY,
+            )
+            async with APIClient(settings) as api:
+                for route in ("heartbeat", "jobs/claim", "results", "logs"):
+                    with self.subTest(route=route), self.assertRaises(APIError) as error:
+                        await api.post(route, {})
+                    self.assertEqual(error.exception.code, "connection_failed")
+        self.assertEqual(len(attempts), 4)
+        for request in attempts:
+            self.assertTrue(request.startswith(b"CONNECT 127.0.0.1:1 HTTP/1.1\r\n"))
+            self.assertIn(b"Proxy-Authorization: Basic dXNlcjpwYXNzd29yZA==", request)
+            self.assertNotIn(KEY.encode(), request)
+
+    async def test_socks5h_sends_the_hostname_and_handles_proxy_rejection(self):
+        targets = []
+
+        async def reject_target(reader, writer):
+            try:
+                _, method_count = await reader.readexactly(2)
+                await reader.readexactly(method_count)
+                writer.write(b"\x05\x00")
+                await writer.drain()
+                _, _, _, address_type = await reader.readexactly(4)
+                address_length = (await reader.readexactly(1))[0] if address_type == 3 else 4
+                targets.append((address_type, await reader.readexactly(address_length)))
+                await reader.readexactly(2)
+                writer.write(b"\x05\x02\x00\x01\x00\x00\x00\x00\x00\x00")
+                await writer.drain()
+            finally:
+                writer.close()
+                await writer.wait_closed()
+
+        async with await asyncio.start_server(reject_target, "127.0.0.1", 0) as proxy:
+            port = proxy.sockets[0].getsockname()[1]
+            settings = Settings(
+                api_url="https://localhost:1",
+                api_proxy=f"socks5h://127.0.0.1:{port}",
+                API_KEY=KEY,
+            )
+            async with APIClient(settings) as api:
+                with self.assertRaises(APIError) as error:
+                    await api.post("heartbeat", {})
+                self.assertEqual(error.exception.code, "connection_failed")
+        self.assertEqual(targets, [(3, b"localhost")])
 
     async def test_only_own_key_is_sent_and_redirects_are_not_followed(self):
         await self.api.post("heartbeat", {})

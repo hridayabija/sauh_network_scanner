@@ -11,10 +11,13 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, Field, SecretStr, model_validator
 import yaml
 
+from .checks.core.proxy import APIProxyURL
+
 
 class Settings(BaseModel):
     model_config = {"extra": "forbid", "hide_input_in_errors": True}
     api_url: str = "https://sauh.duckdns.org"
+    api_proxy: APIProxyURL | None = None
     API_KEY: SecretStr | None = None
     API_KEY_ENV: str | None = Field(default=None, pattern=r"^[A-Z][A-Z0-9_]*$")
     API_KEY_FILE: str = "credentials.json"

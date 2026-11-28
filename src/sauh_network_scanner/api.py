@@ -1,10 +1,16 @@
-"""HTTPS only; no redirects, environment proxies, SSH or database access."""
+"""Scanner API transport with TLS verification and an optional explicit proxy."""
 
 import json
-import time
 import math
+import time
 
 import aiohttp
+from aiohttp_socks import (
+    ProxyConnectionError,
+    ProxyConnector,
+    ProxyError,
+    ProxyTimeoutError,
+)
 
 
 ERROR_CODES = frozenset(
@@ -42,7 +48,22 @@ class APIClient:
         return self.server_epoch + time.monotonic() - self.server_monotonic
 
     async def __aenter__(self):
+        proxy = self.settings.api_proxy
+        proxy_url = proxy.get_secret_value() if proxy is not None else None
+        connector = None
+        if proxy_url is not None:
+            scheme, _, address = proxy_url.partition("://")
+            scheme = scheme.lower()
+            if scheme in {"socks4", "socks5", "socks5h"}:
+                remote_dns = scheme == "socks5h"
+                connector = ProxyConnector.from_url(
+                    f"socks5://{address}" if remote_dns else proxy_url,
+                    rdns=remote_dns,
+                )
+                proxy_url = None
         self.session = aiohttp.ClientSession(
+            connector=connector,
+            proxy=proxy_url,
             trust_env=False,
             auto_decompress=False,
             timeout=aiohttp.ClientTimeout(total=self.settings.request_timeout_seconds),
@@ -116,9 +137,9 @@ class APIClient:
                 return result
         except APIError:
             raise
-        except TimeoutError:
+        except (TimeoutError, ProxyTimeoutError):
             raise APIError(code="connection_timeout") from None
-        except (aiohttp.ClientError, OSError):
+        except (aiohttp.ClientError, OSError, ProxyConnectionError, ProxyError):
             raise APIError() from None
         except ValueError:
             raise APIError(200, "invalid_response") from None
